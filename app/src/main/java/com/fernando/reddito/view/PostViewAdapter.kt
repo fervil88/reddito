@@ -26,7 +26,6 @@ class PostViewAdapter (
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder {
 
         return when (viewType) {
-
             VIEW_TYPE_LOADING -> ProgressHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_loading, parent, false))
             VIEW_TYPE_NORMAL -> PostViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_post_view, parent, false), posts)
             else -> PostViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_post_view, parent, false), posts)
@@ -46,6 +45,24 @@ class PostViewAdapter (
     }
 
     override fun getItemCount() = posts.size
+
+    fun clear() {
+        posts.clear()
+        notifyDataSetChanged()
+    }
+
+    fun addLoading() {
+        isLoaderVisible = true
+        posts.add(Child()) //For loading progress bar
+        notifyItemInserted(posts.size - 1)
+    }
+
+    fun removeLoading() {
+        isLoaderVisible = false
+        val position = posts.size - 1
+        posts.removeAt(position)
+        notifyItemRemoved(position)
+    }
 
     fun updatePost(list: MutableList<Child>) {
         posts.addAll(list)
