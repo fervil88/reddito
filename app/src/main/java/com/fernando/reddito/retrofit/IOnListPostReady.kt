@@ -1,9 +1,9 @@
 package com.fernando.reddito.retrofit
 
-import com.fernando.reddito.model.Post
+import com.fernando.reddito.model.Child
 
 interface IOnListPostReady {
 
-    fun onPostsDone(list: MutableList<Post>)
+    fun onPostsDone(list: MutableList<Child>)
 
 }

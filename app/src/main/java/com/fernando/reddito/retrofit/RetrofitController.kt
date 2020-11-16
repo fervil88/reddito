@@ -42,6 +42,7 @@ class RetrofitController {
                         if(size > 0){
                             val list = exampleObject.data?.children
                             list?.forEach { child -> mPostList.add(child)}
+                            mIOnListPostReady.onPostsDone(mPostList)
                         }
                     }
                 }

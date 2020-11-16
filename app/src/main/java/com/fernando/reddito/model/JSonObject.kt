@@ -10,7 +10,7 @@ class JSonObject {
     @SerializedName("kind")
     @Expose
     var kind: String? = null
-    @SerializedName("dataChild")
+    @SerializedName("data")
     @Expose
     var data: Data? = null
 
@@ -25,7 +25,7 @@ class JSonObject {
     }
 
     override fun toString(): String {
-        return ToStringBuilder(this).append("kind", kind).append("dataChild", data).toString()
+        return ToStringBuilder(this).append("kind", kind).append("data", data).toString()
     }
 
 }

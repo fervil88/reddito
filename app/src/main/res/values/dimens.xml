@@ -1,0 +1,5 @@
+<resources>
+    <!-- Item Post -->
+    <dimen name="item_view_layout_margin">5dp</dimen>
+
+</resources>
