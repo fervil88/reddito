@@ -56,11 +56,12 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
 
                 // # Home Fragment
                 val bundle = Bundle()
-                bundle.putSerializable("fragmentName", "Detail Fragment")
-                val homeFragment = PostDetailFragment()
-                homeFragment.arguments = bundle
+                val currentPost = mAdapter.getItem(position)
+                bundle.putSerializable("post", currentPost)
+                val postDetailFragment = PostDetailFragment()
+                postDetailFragment.arguments = bundle
                 supportFragmentManager.beginTransaction()
-                    .replace(R.id.activity_main_content_id, homeFragment).commit()
+                    .replace(R.id.activity_main_content_id, postDetailFragment).commit()
 
                 Handler().postDelayed({
                     mBinding.drawerLayout.closeDrawer(GravityCompat.START)

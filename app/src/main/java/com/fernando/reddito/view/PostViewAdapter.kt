@@ -46,6 +46,11 @@ class PostViewAdapter (
 
     override fun getItemCount() = posts.size
 
+
+    fun getItem(position: Int): Child {
+        return posts[position]
+    }
+
     fun clear() {
         posts.clear()
         notifyDataSetChanged()
