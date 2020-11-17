@@ -13,7 +13,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.fernando.reddito.R
 import com.fernando.reddito.databinding.ActivityMainBinding
 import com.fernando.reddito.model.Child
-import com.fernando.reddito.model.Post
 import com.fernando.reddito.view.PaginationScrollListener.Companion.PAGE_START
 import com.fernando.reddito.viewmodel.PostListViewModel
 
@@ -62,6 +61,12 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
                 postDetailFragment.arguments = bundle
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.activity_main_content_id, postDetailFragment).commit()
+
+                if (!currentPost.isRead) {
+                    mPostListViewModel.postRead(currentPost.dataChild?.id!!)
+                    currentPost.isRead = true
+                    mAdapter.notifyDataSetChanged()
+                }
 
                 Handler().postDelayed({
                     mBinding.drawerLayout.closeDrawer(GravityCompat.START)

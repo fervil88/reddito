@@ -1,13 +1,15 @@
 package com.fernando.reddito.viewmodel
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import com.fernando.reddito.db.PostRepositoryManager
 import com.fernando.reddito.model.Child
-import com.fernando.reddito.model.Post
 import com.fernando.reddito.retrofit.IOnListPostReady
 import com.fernando.reddito.retrofit.RetrofitController
+import net.sqlcipher.database.SQLiteDatabase
 
-class PostListViewModel : ViewModel() {
+class PostListViewModel(application: Application) : AndroidViewModel(application) {
 
     companion object {
         const val TAG = "PostListViewModel"
@@ -22,12 +24,21 @@ class PostListViewModel : ViewModel() {
 
     private val mIOnListPostReady = object : IOnListPostReady {
         override fun onPostsDone(list: MutableList<Child>) {
+            list.forEach { child -> child.isRead = PostRepositoryManager.mDBSQLiteHelper.isIDRead(
+                child.dataChild?.id!!
+            ) }
             mPostList = list
         }
     }
 
     init {
         mRetrofitController.getRedditPost(mIOnListPostReady)
+        SQLiteDatabase.loadLibs(getApplication<Application>().applicationContext)
+        PostRepositoryManager.initialize(getApplication<Application>().applicationContext)
+    }
+
+    fun postRead(id: String) {
+        PostRepositoryManager.mDBSQLiteHelper.addPostID(id)
     }
 
     fun loadNextPagePost() {

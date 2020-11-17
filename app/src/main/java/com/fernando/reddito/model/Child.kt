@@ -15,6 +15,8 @@ class Child: Serializable {
     @Expose
     var dataChild: DataChild? = null
 
+    var isRead = false
+
     fun withKind(kind: String): Child {
         this.kind = kind
         return this

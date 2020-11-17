@@ -70,7 +70,7 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginEnd="2dp"
                 android:layout_marginBottom="5dp"
-                android:src="@android:drawable/sym_action_chat" />
+                android:src="@drawable/comment" />
 
             <TextView
                 android:id="@+id/number_comments_text_item"

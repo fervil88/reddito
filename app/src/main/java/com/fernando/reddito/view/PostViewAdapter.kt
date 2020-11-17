@@ -18,7 +18,6 @@ class PostViewAdapter (
     private var isLoaderVisible = false
 
     companion object {
-        const val TAG = "PostViewAdapter"
         const val VIEW_TYPE_LOADING = 0
         const val VIEW_TYPE_NORMAL = 1
     }
@@ -87,12 +86,14 @@ class PostViewAdapter (
             val date: TextView = itemView.findViewById(R.id.date_text_item)
             val thumbnail: ImageView = itemView.findViewById(R.id.thumb_image_item)
             val numberComments: TextView = itemView.findViewById(R.id.number_comments_text_item)
+            val notification: ImageView = itemView.findViewById(R.id.notification)
 
             val currentPost = posts[position]
             title.text = currentPost.dataChild?.title
             author.text = currentPost.dataChild?.author
             date.text = currentPost.dataChild?.created.toString()
             numberComments.text = currentPost.dataChild?.numComments.toString()
+            notification.visibility = if (currentPost.isRead ) View.GONE else View.VISIBLE
 
             val url = currentPost.dataChild?.url
             if (url != null) {
