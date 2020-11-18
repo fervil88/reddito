@@ -1,8 +1,11 @@
 package com.fernando.reddito.view
 
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
@@ -15,10 +18,13 @@ import com.fernando.reddito.databinding.ActivityMainBinding
 import com.fernando.reddito.model.Child
 import com.fernando.reddito.view.PaginationScrollListener.Companion.PAGE_START
 import com.fernando.reddito.viewmodel.PostListViewModel
+import androidx.core.app.ActivityCompat
+import android.os.Build
 
 class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
 
     private var currentPage = PAGE_START
+    private val TAG = "MainActivity"
     private var isLastPage = false
     private var totalPage = 5
     private var isLoading = false
@@ -47,13 +53,12 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
     override fun onResume() {
         super.onResume()
 
-        mAdapter = PostViewAdapter(mPostListViewModel.mPostList){}
+        mAdapter = PostViewAdapter(mPostListViewModel.mPostList)
         mBinding.navigationRecyclerView.adapter = mAdapter
 
         mBinding.navigationRecyclerView.addOnItemTouchListener(RecyclerTouchListener(this, object : ClickListener {
             override fun onClick(view: View, position: Int) {
 
-                // # Home Fragment
                 val bundle = Bundle()
                 val currentPost = mAdapter.getItem(position)
                 bundle.putSerializable("post", currentPost)
@@ -62,12 +67,19 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.activity_main_content_id, postDetailFragment).commit()
 
+                //Set the post as read if it's not
                 if (!currentPost.isRead) {
                     mPostListViewModel.postRead(currentPost.dataChild?.id!!)
                     currentPost.isRead = true
                     mAdapter.notifyDataSetChanged()
                 }
 
+                //Copy image into gallery
+                if (isStoragePermissionGranted()) {
+                    mPostListViewModel.storeImage(currentPost.dataChild?.url!!)
+                }
+
+                //Close list of post
                 Handler().postDelayed({
                     mBinding.drawerLayout.closeDrawer(GravityCompat.START)
                 }, 200)
@@ -95,6 +107,27 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
         isLastPage = false
         mAdapter.clear()
         loadMorePosts()
+    }
+
+    private fun isStoragePermissionGranted(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                Log.v(TAG, "Permission is granted")
+                return true
+            } else {
+
+                Log.v(TAG, "Permission is revoked")
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                    1
+                )
+                return false
+            }
+        } else { //permission is automatically granted on sdk<23 upon installation
+            Log.v(TAG, "Permission is granted")
+            return true
+        }
     }
 
     private fun loadMorePosts() {

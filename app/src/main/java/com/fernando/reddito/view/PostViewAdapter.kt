@@ -8,12 +8,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.fernando.reddito.R
 import com.fernando.reddito.model.Child
-import com.fernando.reddito.model.Post
 import com.squareup.picasso.Picasso
 
 class PostViewAdapter (
-    private var posts : MutableList<Child>,
-    private val listener : (Post) -> Unit) : RecyclerView.Adapter<BaseViewHolder>() {
+    private var posts : MutableList<Child>) : RecyclerView.Adapter<BaseViewHolder>() {
 
     private var isLoaderVisible = false
 

@@ -3,7 +3,6 @@ package com.fernando.reddito.retrofit
 import android.util.Log
 import com.fernando.reddito.model.Child
 import com.fernando.reddito.model.JSonObject
-import com.fernando.reddito.model.Post
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
