@@ -15,8 +15,6 @@ abstract class PaginationScrollListener(
 
     companion object {
         const val PAGE_START = 1
-
-        const val PAGE_SIZE = 5
     }
 
     abstract fun isLastPage(): Boolean
@@ -32,8 +30,7 @@ abstract class PaginationScrollListener(
 
         if (!isLoading() && !isLastPage()) {
             if ((childCount + firstVisibleItemPosition) >= itemCount
-                && firstVisibleItemPosition >= 0
-                && itemCount >= PAGE_SIZE) {
+                && firstVisibleItemPosition >= 0) {
                 loadMoreItems()
             }
         }

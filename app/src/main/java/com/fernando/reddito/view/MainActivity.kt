@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import android.view.View
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -20,11 +19,20 @@ import com.fernando.reddito.view.PaginationScrollListener.Companion.PAGE_START
 import com.fernando.reddito.viewmodel.PostListViewModel
 import androidx.core.app.ActivityCompat
 import android.os.Build
+import android.os.AsyncTask
+import com.fernando.reddito.util.Constants.DEFAULT_THUMBNAIL
+import com.fernando.reddito.util.Constants.SELECTED_POST
+import java.io.IOException
+import java.net.MalformedURLException
+
 
 class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
 
+    companion object {
+        val TAG = MainActivity::class.simpleName
+    }
+
     private var currentPage = PAGE_START
-    private val TAG = "MainActivity"
     private var isLastPage = false
     private var totalPage = 5
     private var isLoading = false
@@ -52,46 +60,18 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onResume() {
         super.onResume()
-
-        mAdapter = PostViewAdapter(mPostListViewModel.mPostList)
+        mAdapter =
+            PostViewAdapter(mPostListViewModel.mPostList) { position -> onClickView(position) }
         mBinding.navigationRecyclerView.adapter = mAdapter
-
-        mBinding.navigationRecyclerView.addOnItemTouchListener(RecyclerTouchListener(this, object : ClickListener {
-            override fun onClick(view: View, position: Int) {
-
-                val bundle = Bundle()
-                val currentPost = mAdapter.getItem(position)
-                bundle.putSerializable("post", currentPost)
-                val postDetailFragment = PostDetailFragment()
-                postDetailFragment.arguments = bundle
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.activity_main_content_id, postDetailFragment).commit()
-
-                //Set the post as read if it's not
-                if (!currentPost.isRead) {
-                    mPostListViewModel.postRead(currentPost.dataChild?.id!!)
-                    currentPost.isRead = true
-                    mAdapter.notifyDataSetChanged()
-                }
-
-                //Copy image into gallery
-                if (isStoragePermissionGranted()) {
-                    mPostListViewModel.storeImage(currentPost.dataChild?.url!!)
-                }
-
-                //Close list of post
-                Handler().postDelayed({
-                    mBinding.drawerLayout.closeDrawer(GravityCompat.START)
-                }, 200)
-            }
-        }))
-        mBinding.navigationRecyclerView.addOnScrollListener(object : PaginationScrollListener(layoutManager) {
+        mBinding.navigationRecyclerView.addOnScrollListener(object :
+            PaginationScrollListener(layoutManager) {
 
             override fun loadMoreItems() {
                 isLoading = true
                 currentPage++
                 loadMorePosts()
             }
+
             override fun isLastPage() = isLastPage
             override fun isLoading() = isLoading
         })
@@ -109,20 +89,48 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
         loadMorePosts()
     }
 
+    private fun onClickView(position: Int) {
+        val bundle = Bundle()
+        val currentPost = mAdapter.getItem(position)
+        bundle.putSerializable(SELECTED_POST, currentPost)
+        val postDetailFragment = PostDetailFragment()
+        postDetailFragment.arguments = bundle
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.activity_main_content_id, postDetailFragment).commit()
+
+        //Set the post as read if it's not
+        if (!currentPost.isRead) {
+            mPostListViewModel.postRead(currentPost.dataChild?.id!!)
+            currentPost.isRead = true
+            mAdapter.notifyDataSetChanged()
+        }
+
+        //Copy image into gallery
+        if (isStoragePermissionGranted()) {
+            if (currentPost.dataChild?.thumbnail != DEFAULT_THUMBNAIL){
+                DownloadImageTask(mPostListViewModel).execute(currentPost.dataChild?.url)
+            }
+        }
+
+        //Close list of post
+        Handler().postDelayed({
+            mBinding.drawerLayout.closeDrawer(GravityCompat.START)
+        }, 200)
+    }
+
     private fun isStoragePermissionGranted(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            return if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 Log.v(TAG, "Permission is granted")
-                return true
+                true
             } else {
-
                 Log.v(TAG, "Permission is revoked")
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                     1
                 )
-                return false
+                false
             }
         } else { //permission is automatically granted on sdk<23 upon installation
             Log.v(TAG, "Permission is granted")
@@ -131,7 +139,7 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun loadMorePosts() {
-        Handler().postDelayed( {
+        Handler().postDelayed({
             mBinding.navigationLayout.isRefreshing = false
             if (currentPage != PAGE_START) mAdapter.removeLoading()
             mPostListViewModel.loadNextPagePost()
@@ -145,4 +153,17 @@ class MainActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
             isLoading = false
         }, 1500)
     }
+
+    class DownloadImageTask(var mPostListViewModel: PostListViewModel) : AsyncTask<String, Void, Unit>() {
+        override fun doInBackground(vararg url: String){
+            try {
+                mPostListViewModel.storeImage(url[0])
+            } catch (e: MalformedURLException) {
+                e.printStackTrace()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
 }

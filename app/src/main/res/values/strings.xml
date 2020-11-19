@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Reddito</string>
+    <string name="dismiss_button_text">Dismiss Post</string>
 </resources>

@@ -44,17 +44,26 @@
             android:textSize="24sp"
             tools:text="The Boys need love too" />
 
-
-
         <ImageView
             android:id="@+id/thumb_image_item"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal|fill_horizontal"
+            android:adjustViewBounds="true"
             android:scaleType="centerCrop"
-            android:src="@android:drawable/gallery_thumb"
-            android:adjustViewBounds="true"/>
+            android:src="@android:drawable/gallery_thumb" />
 
+        <TextView
+            android:id="@+id/title_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:textAlignment="viewStart"
+            android:textSize="24sp"
+            android:visibility="gone"
+            tools:text="HTTP://an_url" />
 
         <LinearLayout
             android:layout_width="match_parent"

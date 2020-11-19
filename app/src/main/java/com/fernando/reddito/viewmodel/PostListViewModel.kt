@@ -1,7 +1,6 @@
 package com.fernando.reddito.viewmodel
 
 import android.app.Application
-import android.os.Environment
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.fernando.reddito.db.PostRepositoryManager
@@ -9,15 +8,12 @@ import com.fernando.reddito.model.Child
 import com.fernando.reddito.retrofit.IOnListPostReady
 import com.fernando.reddito.retrofit.RetrofitController
 import net.sqlcipher.database.SQLiteDatabase
-import android.os.Environment.getExternalStorageDirectory
 import android.util.Log
 import java.io.FileOutputStream
 import java.net.URL
 import android.provider.MediaStore.Images
-import android.provider.MediaStore
 import android.content.ContentValues
 import android.content.Context
-
 
 class PostListViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -56,7 +52,7 @@ class PostListViewModel(application: Application) : AndroidViewModel(application
         val input = url.openStream()
         input.use { inputStream ->
             val storagePath = getApplication<Application>().applicationContext.getExternalFilesDir(null)
-            Log.d(TAG, "PATH: ${storagePath?.path} + ${url.file}")
+            Log.d(TAG, "PATH: ${storagePath?.path}${url.file}")
             val path = storagePath?.path + url.file
             val output = FileOutputStream(path)
             output.use { outputStream ->
@@ -74,7 +70,7 @@ class PostListViewModel(application: Application) : AndroidViewModel(application
         val values = ContentValues()
         values.put(Images.Media.DATE_ADDED, System.currentTimeMillis())
         values.put(Images.Media.MIME_TYPE, "image/jpeg")
-        values.put(Images.Media._ID, filePath)
+        values.put(Images.Media.DATA, filePath)
 
         context.contentResolver.insert(Images.Media.EXTERNAL_CONTENT_URI, values)
     }
